@@ -1,32 +1,37 @@
 ﻿namespace Kalkulator
 {
-    public abstract class Calculator
+    public class Calculator
     {
+        private int counter = 0;
 
         public Calculator()
         {
         }
 
-        private int counter = 0;
-        public int Add(int x, int y)
+        public int GetCounter() 
+        {
+            return counter;
+        }
+
+        public double Add(double x, double y)
         {
             counter++;
             return x + y;
         }
         
-        public int Subtract(int x, int y)
+        public double Subtract(double x, double y)
         {
             counter++;
             return x - y;
         }
         
-        public int Multiply(int x, int y)
+        public double Multiply(double x, double y)
         {
             counter++;
             return x * y; 
         }
         
-        public double Divide(int x, int y)
+        public double Divide(double x, double y)
         {
             counter++;
             return x / y;
