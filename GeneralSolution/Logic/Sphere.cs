@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 
 namespace Logic
 {
@@ -9,14 +8,14 @@ namespace Logic
         //Properties:
         private Random randomiser = new Random();
         public int R { get; set; }
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Direction_X { get; set; }
-        public float Direction_Y { get; set; }
-        public float Speed { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Direction_X { get; set; }
+        public double Direction_Y { get; set; }
+        public double Speed { get; set; }
 
         //Constructor assigning to a sphere it's position in 2D and radius (how big it is).
-        public Sphere(float x, float y, int r)
+        public Sphere(double x = 10, double y = 10, int r = 5)
         {
             R = r;
             X = x;
@@ -28,8 +27,8 @@ namespace Logic
         public void PickRandomPosition(int width, int height)
         {
             //We use max width and hight - R*4, beacuse we want the balls to start with some distance from the edge of our window.
-            this.X = this.R + randomiser.Next(width - this.R * 4);
-            this.Y = this.R + randomiser.Next(height - this.R * 4);
+            this.X = this.R * 4 + randomiser.Next(width - this.R * 8);
+            this.Y = this.R * 4 + randomiser.Next(height - this.R * 8);
         }
 
         public void PickRandomDirection()
@@ -42,8 +41,8 @@ namespace Logic
             int Y_axis = randomiser.Next(2) == 1 ? 1 : -1;
 
             //Finally we randomise where we are moving to.
-            this.Direction_X = (float)(0.0001 * X_axis * (1 + randomiser.Next(10000)));
-            this.Direction_Y = (float)(0.0001 * Y_axis * (1 + randomiser.Next(10000)));
+            this.Direction_X = (double)(0.0001 * X_axis * (1 + randomiser.Next(10000)));
+            this.Direction_Y = (double)(0.0001 * Y_axis * (1 + randomiser.Next(10000)));
         }
 
         //This method makes a single sphere change it's position towards the direction.

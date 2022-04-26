@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace Logic
 {
-    namespace Logic
-    {
         public abstract class LogicAPI
         {
             //Abstract methods of our API.
@@ -14,7 +12,8 @@ namespace Logic
             public abstract void RemoveObject(Sphere ball);
             public abstract void RemoveAll();
             public abstract List<Sphere> GetAll();
-            public abstract void PickRandomPositions(int maxWidth, int maxHeight);
+            public abstract void PickRandomPositions(int width, int height);
+
             //We create bussiness logic.
             public static LogicAPI CreateLayer(DataAPI data = default)
             {
@@ -25,12 +24,12 @@ namespace Logic
             //This class implements our abstract API.
             private class BusinessLogic : LogicAPI
             {
-                private readonly DataAPI MyDataLayer;
+                private readonly DataAPI DataLayer;
 
                 //Constructor creates a field object and requiers DataAPI object or NULL(defauklt, when Data layer is not used).
                 public BusinessLogic(DataAPI api)
                 {
-                    MyDataLayer = api;
+                    DataLayer = api;
                     Field = new Field(750, 350);
                 }
 
@@ -55,11 +54,11 @@ namespace Logic
                 //Getting a list of all spheres present in the field.
                 public override List<Sphere> GetAll()
                 {
-                    return Field.GetAll();
+                    return Field.SphereList;
                 }
 
                 //Uses method from sphere class to randomise position of every sphere in the field.
-                public override void PickRandomPositions(int maxWidth, int maxHeight)
+                public override void PickRandomPositions(int width, int height)
                 {
                     for (int i = 0; i < Field.SphereList.Count; i++)
                     {
@@ -72,7 +71,6 @@ namespace Logic
                 {
                     Field.RemoveAll();
                 }
-            }
         }
     }
 }

@@ -28,12 +28,6 @@ namespace Logic
             }
         }
 
-        //Returns the list of spheres used by this object.
-        public List<Sphere> GetAll()
-        {
-            return this.SphereList;
-        }
-
         //Adding new object to the list.
         public void AddToList(Sphere s)
         {
