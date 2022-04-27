@@ -30,7 +30,7 @@ namespace Logic
                 public BusinessLogic(DataAPI api)
                 {
                     DataLayer = api;
-                    Field = new Field(750, 350);
+                    Field = new Field(350, 350);
                 }
 
                 //Move all spheres using method from field.

@@ -1,0 +1,41 @@
+﻿<Window x:Class="View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mv="clr-namespace:ViewModel;assembly=ViewModel"
+        mc:Ignorable="d"
+        Title="ConcurrentProgrammingPart1" Height="400" Width="500" ResizeMode="NoResize">
+    <Window.DataContext>
+        <mv:MainWindowViewModel />
+    </Window.DataContext>
+    <Grid>
+
+        <ItemsControl ItemsSource="{Binding Spheres}" HorizontalAlignment="Left" VerticalAlignment="Top " Margin="120,0,0,0">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas Background="Cyan" Width="350" Height="350" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+
+            <ItemsControl.ItemContainerStyle>
+                <Style TargetType="{x:Type ContentPresenter}">
+                    <Setter Property="Canvas.Left" Value="{Binding Position_X}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Position_Y}" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Ellipse Width="{Binding Radius}" Height="{Binding Radius}" Fill="red" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button IsEnabled="{Binding CanResume}"  Content="RESUME" Width="94" Height="40" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Command="{Binding ResumeSimulationAction}"/>
+        <Button IsEnabled="{Binding CanPause}"  Content="PAUSE" Width="94" Height="40" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Command="{Binding PauseSimulationAction}"/>
+        <TextBox x:Name="textBox" Text="{Binding TextBox}" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="94" Margin="10,160,0,0" Height="29"/>
+        <Button IsEnabled="{Binding IsReadyToBegin}" Content="START" Width="94" Height="40" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Command="{Binding BeginSimulationAction}"/>
+
+
+    </Grid>
+</Window>
