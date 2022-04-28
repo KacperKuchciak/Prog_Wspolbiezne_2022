@@ -20,14 +20,14 @@
 
             <ItemsControl.ItemContainerStyle>
                 <Style TargetType="{x:Type ContentPresenter}">
-                    <Setter Property="Canvas.Left" Value="{Binding Position_X}" />
-                    <Setter Property="Canvas.Top" Value="{Binding Position_Y}" />
+                    <Setter Property="Canvas.Left" Value="{Binding X}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
                 </Style>
             </ItemsControl.ItemContainerStyle>
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Ellipse Width="{Binding Radius}" Height="{Binding Radius}" Fill="red" />
+                    <Ellipse Width="{Binding R}" Height="{Binding R}" Fill="red" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
@@ -35,7 +35,8 @@
         <Button IsEnabled="{Binding CanPause}"  Content="PAUSE" Width="94" Height="40" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Command="{Binding PauseSimulationAction}"/>
         <TextBox x:Name="textBox" Text="{Binding TextBox}" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="94" Margin="10,160,0,0" Height="29"/>
         <Button IsEnabled="{Binding IsReadyToBegin}" Content="START" Width="94" Height="40" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Command="{Binding BeginSimulationAction}"/>
-
-
+        <Button IsEnabled="{Binding CanIncrease}" Content="+" Width="45" Height="20" HorizontalAlignment="Left" Margin="10,225,0,0" VerticalAlignment="Top" Command="{Binding IncreaseSpeedAction}"/>
+        <Button IsEnabled="{Binding CanDecrease}" Content="-" Width="45" Height="20" HorizontalAlignment="Left" Margin="59,225,0,0" VerticalAlignment="Top" Command="{Binding DecreaseSpeedAction}"/>
+        <TextBlock Text="SPEED" Width="94" Height="20" TextAlignment="Center" HorizontalAlignment="Left" Margin="10,200,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

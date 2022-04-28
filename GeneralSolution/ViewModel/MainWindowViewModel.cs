@@ -19,6 +19,9 @@ namespace ViewModel
         //Controllers telling us about the state of the game;
         private bool isPaused = false;
         private bool isResumed = false;
+        //Controllers telling us whether we can change speed.
+        private bool canIncrease = true;
+        private bool canDecrease = true;
 
         //Content of the box represented by string.
         private string box_content;
@@ -36,6 +39,8 @@ namespace ViewModel
         public ICommand BeginSimulationAction { get; set; }
         public ICommand ResumeSimulationAction { get; set; }
         public ICommand PauseSimulationAction { get; set; }
+        public ICommand IncreaseSpeedAction { get; set; }
+        public ICommand DecreaseSpeedAction { get; set; }
 
         //How many spheres will be placed.
         public int HowMany { get; set; }
@@ -57,6 +62,11 @@ namespace ViewModel
             set{isResumed = value; RaisePropertyChanged("CanPause");}}
         public bool CanResume{get{return isPaused;}
             set{isPaused = value; RaisePropertyChanged("CanResume");}}
+        //Controllers for changing speed
+        public bool CanIncrease{get{return canIncrease;}
+            set{canIncrease = value; RaisePropertyChanged("CanIncrease");}}
+        public bool CanDecrease{get{return canDecrease;}
+            set{canDecrease = value; RaisePropertyChanged("CanDecrease");}}
 
         //Simply checks out what we have in the text box and makes sure, that the simulation won't start as long, as we don't have
         //appropriate number in there.
@@ -80,6 +90,9 @@ namespace ViewModel
             BeginSimulationAction = new RelayCommand(() => BeginSimulation());
             ResumeSimulationAction = new RelayCommand(() => ResumeSimulation());
             PauseSimulationAction = new RelayCommand(() => PauseSimulation());
+            IncreaseSpeedAction = new RelayCommand(() => IncreaseSpeed());
+            DecreaseSpeedAction = new RelayCommand(() => DecreaseSpeed());
+
             //We create new instance of model api and assign it as this object's Model layer representation.
             modelLayer = ModelAPI.CreateApi();
             for (int i = 0; i < modelLayer.PresentedSpheres.Count; i++)
@@ -107,9 +120,6 @@ namespace ViewModel
                 simulationThread = new Task(Simulation);
                 //We assign a method that has a never ending loop to one of the threads. This will simulate sphere movement. 
                 movingThread = new Task(modelLayer.MoveSpheres);
-
-                //We make sure to clean the model layer.
-                modelLayer.RemoveSpheres();
                 //We create required amount of spheres in our model layer.
                 modelLayer.AddSpheres(howMany);
                 //And randomise their positions based on the boundries of the screen and the size of the balls.
@@ -129,6 +139,23 @@ namespace ViewModel
             }
         }
 
+        private void IncreaseSpeed()
+        {
+            CanIncrease = modelLayer.ChangeSpeed(true);
+            CanDecrease = true;
+        }
+
+        private void DecreaseSpeed()
+        {
+            CanDecrease = modelLayer.ChangeSpeed(false);
+            CanIncrease = true;
+        }
+        private void PauseSimulation()
+        {
+            CanPause = false;
+            CanResume = true;
+        }
+
         private void ResumeSimulation()
         {
 
@@ -140,12 +167,6 @@ namespace ViewModel
             //Starting it.
             simulationThread.Start();
 
-        }
-
-        private void PauseSimulation()
-        {
-            CanPause = false;
-            CanResume = true;
         }
 
         private void Simulation()

@@ -11,6 +11,7 @@ namespace Logic
             public abstract void AddObject(Sphere ball);
             public abstract void RemoveObject(Sphere ball);
             public abstract void RemoveAll();
+            public abstract bool ChangeSpeed(bool change);
             public abstract List<Sphere> GetAll();
             public abstract void PickRandomPositions(int width, int height);
 
@@ -32,9 +33,37 @@ namespace Logic
                     DataLayer = api;
                     Field = new Field(350, 350);
                 }
-
-                //Move all spheres using method from field.
-                public override void MoveAll()
+                //Allows us to change speed while making sure that we don't slow it down to zero
+                public override bool ChangeSpeed(bool b)
+                {
+                    bool inc = true;
+                    bool dec = true;
+                    for (int i = 0; i < Field.SphereList.Count; i++)
+                    {
+                        if (Field.SphereList[i].Speed <= 1)
+                            dec = false;
+                        if (Field.SphereList[i].Speed >= 20)
+                            inc = false;
+                    }
+                    if ((b && !inc) || (!b && !dec))
+                    {
+                        return false;
+                    }
+                    for (int j = 0; j < Field.SphereList.Count; j++)
+                    {
+                        if (b && inc)
+                        {
+                            Field.SphereList[j].Speed = (Field.SphereList[j].Speed + 1);
+                        }
+                        else if (dec)
+                        {
+                            Field.SphereList[j].Speed = (Field.SphereList[j].Speed - 1);
+                        } 
+                    }
+                    return true;
+                }
+            //Move all spheres using method from field.
+            public override void MoveAll()
                 {
                     Field.MoveAll();
                 }

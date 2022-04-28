@@ -22,7 +22,7 @@ namespace Model
         public abstract void RemoveSpheres();
         public abstract void MoveSpheres();
         public abstract void PickRandomPositions(int width, int height);
-
+        public abstract bool ChangeSpeed(bool b);
     }
 
     internal class ModelLayer : ModelAPI
@@ -64,8 +64,13 @@ namespace Model
             PresentedSpheres.Clear();
             logicLayer.RemoveAll();
         }
+        //Changing speed
+        public override bool ChangeSpeed(bool b)
+        {
+           return logicLayer.ChangeSpeed(b);
+        }
 
-        //Triggering movement in logiacl layer every 15ms.
+        //Triggering movement in logical layer every 15ms.
         public override void MoveSpheres()
         {
             while (true)

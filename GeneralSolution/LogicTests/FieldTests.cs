@@ -63,6 +63,35 @@ namespace LogicTests
         }
 
         [TestMethod]
+        public void ChangeSpeedAllowedTest()
+        {
+            Field f = new Field(100, 110);
+            Sphere s1 = new Sphere(10, 10, 1);
+            s1.Speed = 19;
+            LogicAPI api = Logic.LogicAPI.CreateLayer();
+            f.AddToList(s1);
+            api.Field = f;
+            api.ChangeSpeed(true);
+            Assert.AreEqual(20, api.GetAll()[0].Speed);
+            api.ChangeSpeed(false);
+            api.ChangeSpeed(false);
+            Assert.AreEqual(18, api.GetAll()[0].Speed);
+        }
+
+        [TestMethod]
+        public void ChangeSpeedNotAllowedTest()
+        {
+            Field f = new Field(100, 110);
+            Sphere s1 = new Sphere(10, 10, 1);
+            s1.Speed = 1;
+            LogicAPI api = Logic.LogicAPI.CreateLayer();
+            f.AddToList(s1);
+            api.Field = f;
+            api.ChangeSpeed(false);
+            Assert.AreEqual(1, api.GetAll()[0].Speed);
+        }
+
+        [TestMethod]
         public void MoveAllTest()
         {
             Field f = new Field(100, 110);

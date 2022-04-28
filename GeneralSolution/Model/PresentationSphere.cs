@@ -13,13 +13,13 @@ namespace Model
         public string Color { get; set; }
 
         //We take Radius times 2 from logic.
-        public int Radius { get { return Sphere.R * 2; } }
+        public int R { get { return Sphere.R * 2; } }
         //And Speed (probably will be removed in finall build)
         public double Speed { get { return Sphere.Speed; } }
 
         //Getters hand over some info about position of the sphere in logical spectrum. No setting in presentation layer, of course.
-        public double Position_X { get { return Sphere.X; } }
-        public double Position_Y { get { return Sphere.Y; } }
+        public double X { get { return Sphere.X; } }
+        public double Y { get { return Sphere.Y; } }
 
         //The same for direction the ball moves towards.
         public double Direction_X { get { return Sphere.Direction_X; } }

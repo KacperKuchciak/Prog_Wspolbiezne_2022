@@ -34,7 +34,7 @@ namespace Logic
         public void PickRandomDirection()
         {
             //Changes speed.
-            this.Speed = 1 + randomiser.Next(10);
+            this.Speed = 3;
 
             //We pick randomly either -1 or 1.
             int X_axis = randomiser.Next(2) == 1 ? 1 : -1;
