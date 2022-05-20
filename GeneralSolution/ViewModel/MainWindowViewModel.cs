@@ -13,6 +13,7 @@ namespace ViewModel
         private readonly ModelAPI ModelLayer;
         //Wil help us determine when the simulation is started and decide what actions we can take (start/stop).
         private bool isReadyToBegin = false;
+        private bool didntStartYet = true;
 
         //Content of the box represented by string.
         private string box_content;
@@ -47,7 +48,8 @@ namespace ViewModel
         //While this makes it impossible to restart simulation after it started.
         public bool DidntStartYet
         {
-            get { return !isReadyToBegin; }
+            get { return didntStartYet; }
+            set { didntStartYet = value; RaisePropertyChanged("didntStartYet"); }
         }
 
         //Simply checks out what we have in the text box and makes sure, that the simulation won't start as long, as we don't have
@@ -87,6 +89,7 @@ namespace ViewModel
         {
             //We finally begin the simulation.
             ModelLayer.MoveSpheres();
+            IsReadyToBegin = false;
         }
 
         //What happens when user clicks START button.
@@ -109,6 +112,7 @@ namespace ViewModel
                 //And we let sombody start the simulation.
                 ModelLayer.PickRandomPositions(350, 350);
                 IsReadyToBegin = true;
+                DidntStartYet = false;
             }
         }
 
