@@ -1,105 +1,269 @@
-﻿using Data;
+﻿using DataLayer;
+using System;
 using System.Collections.Generic;
 
 namespace Logic
 {
-        public abstract class LogicAPI
-        {
-            //Abstract methods of our API.
-            public Field Field { get; set; }
-            public abstract void MoveAll();
-            public abstract void AddObject(Sphere ball);
-            public abstract void RemoveObject(Sphere ball);
-            public abstract void RemoveAll();
-            public abstract bool ChangeSpeed(bool change);
-            public abstract List<Sphere> GetAll();
-            public abstract void PickRandomPositions(int width, int height);
+    public abstract class LogicAPI : IObservable<int>, IObserver<Sphere>
+    {
+        //Abstract methods of our API.
+        public abstract double GetSphereX(int id);
+        public abstract double GetSphereY(int id);
+        public abstract double GetSphereRadius(int id);
+        public abstract int CountSpheres();
+        public abstract void PickRandomPositions(int width, int height);
+        public int[] Size { get; set; }
+        public abstract void MoveAll();
+        public abstract int AddObject();
+        public abstract bool ChangeSpeed(bool b);
+        public abstract void OnCompleted();
+        public abstract void OnError(Exception error);
+        public abstract void OnNext(Sphere sphere);
+        public abstract IDisposable Subscribe(IObserver<int> observer);
 
-            //We create bussiness logic.
-            public static LogicAPI CreateLayer(DataAPI data = default)
+        //We create bussiness logic.
+        public static LogicAPI CreateLayer(DataAPI data = default)
+        {
+            //If null, then we go with default option (for object it's null).
+            return new BusinessLogic(data ?? DataAPI.CreateDataLayer(350, 350));
+        }
+
+        //This class implements our abstract API.
+        private class BusinessLogic : LogicAPI
+        {
+            private readonly DataAPI DataLayer;
+            private IDisposable unsubscriber;
+            private IList<IObserver<int>> observers;
+
+            //Constructor creates a field object and requiers DataAPI object or NULL(defauklt, when Data layer is not used).
+            public BusinessLogic(DataAPI api)
             {
-                //If null, then we go with default option (for object it's null).
-                return new BusinessLogic(data ?? DataAPI.CreateDataLayer());
+                DataLayer = api;
+                Subscribe(DataLayer);
+                observers = new List<IObserver<int>>();
+                int[] table = new int[2];
+                table[0] = DataLayer.getWidth();
+                table[1] = DataLayer.getHeight();
+                Size = table;
+            }
+            //Allows us to change speed while making sure that we don't slow it down to zero
+            public override bool ChangeSpeed(bool b)
+            {
+                bool inc = true;
+                bool dec = true;
+                for (int i = 0; i < DataLayer.GetSpheresCount(); i++)
+                {
+                    if (DataLayer.GetSphereSpeed(i) <= 1)
+                        dec = false;
+                    if (DataLayer.GetSphereSpeed(i) >= 20)
+                        inc = false;
+                }
+                if ((b && !inc) || (!b && !dec))
+                {
+                    return false;
+                }
+                for (int j = 0; j < DataLayer.GetSpheresCount(); j++)
+                {
+                    if (b && inc)
+                    {
+                        DataLayer.SetSphereSpeed(j, DataLayer.GetSphereSpeed(j) + 1);
+                    }
+                    else if (dec)
+                    {
+                        DataLayer.SetSphereSpeed(j, DataLayer.GetSphereSpeed(j) - 1) ;
+                    }
+                }
+                return true;
+            }
+            //Move all spheres using method from API.
+            public override void MoveAll()
+            {
+                for (int i = 0; i < DataLayer.GetSpheresCount(); i++)
+                {
+                    DataLayer.StartMovingSphere(i);
+                }
             }
 
-            //This class implements our abstract API.
-            private class BusinessLogic : LogicAPI
+            //Adding new sphere to our field.
+            public override int AddObject()
             {
-                private readonly DataAPI DataLayer;
+                return DataLayer.AddSphere();
+            }
 
-                //Constructor creates a field object and requiers DataAPI object or NULL(defauklt, when Data layer is not used).
-                public BusinessLogic(DataAPI api)
+            //Uses method from sphere class to randomise position of every sphere in the field.
+            public override void PickRandomPositions(int width, int height)
+            {
+                DataLayer.RandomisePozitions(width, height);
+            }
+
+            public void SwitchDirections(int id, bool isX)
+            {
+                DataLayer.SwitchDirectionForSphere(id, isX);
+                NotifyObservers(id);
+            }
+
+            public override double GetSphereX(int id)
+            {
+                return DataLayer.GetSpherePositionX(id);
+            }
+
+            public override double GetSphereY(int id)
+            {
+                return DataLayer.GetSpherePositionY(id);
+            }
+
+            public override double GetSphereRadius(int id)
+            {
+                return DataLayer.GetSphereRadius(id);
+            }
+
+            public override int CountSpheres()
+            {
+                return DataLayer.GetSpheresCount();
+            }
+
+
+            #region observer
+
+            public virtual void Subscribe(IObservable<Sphere> provider)
+            {
+                if (provider != null)
+                    unsubscriber = provider.Subscribe(this);
+            }
+
+            public override void OnCompleted()
+            {
+                unsubscriber.Dispose();
+            }
+
+            public override void OnError(Exception error)
+            {
+                throw error;
+            }
+
+            public override void OnNext(Sphere Sphere)
+            {
+                CheckBorders(Sphere.Id);
+                CheckCollisions(Sphere.Id);
+                NotifyObservers(Sphere.Id);
+            }
+
+            public void NotifyObservers(int id)
+            {
+                foreach (var observer in observers)
                 {
-                    DataLayer = api;
-                    Field = new Field(350, 350);
-                }
-                //Allows us to change speed while making sure that we don't slow it down to zero
-                public override bool ChangeSpeed(bool b)
-                {
-                    bool inc = true;
-                    bool dec = true;
-                    for (int i = 0; i < Field.SphereList.Count; i++)
+                    if (observer != null)
                     {
-                        if (Field.SphereList[i].Speed <= 1)
-                            dec = false;
-                        if (Field.SphereList[i].Speed >= 20)
-                            inc = false;
+                        observer.OnNext(id);
                     }
-                    if ((b && !inc) || (!b && !dec))
+                }
+                System.Threading.Thread.Sleep(1);
+            }
+
+            private void CheckBorders(int id)
+            {
+                double Position_X = DataLayer.GetSpherePositionX(id);
+                double Position_Y = DataLayer.GetSpherePositionY(id);
+                double[] Directions = DataLayer.GetSphereDirections(id);
+                int Radius = DataLayer.GetSphereRadius(id);
+                if (Position_X + Radius * 2 + Directions[0] > Size[0] || Position_X + Directions[0] < 0)
+                    SwitchDirections(id, true);
+                if (Position_Y + Radius * 2 + Directions[1] > Size[1] || Position_Y + Directions[1] < 0)
+                    SwitchDirections(id, false);
+            }
+
+            private void CheckCollisions(int id)
+            {
+                for (int i = 0; i < DataLayer.GetSpheresCount(); i++)
+                {
+                    if (i == id) continue;
+                    double distance = Math.Sqrt(Math.Pow((DataLayer.GetSpherePositionX(id) + DataLayer.GetSphereDirections(id)[0]) - (DataLayer.GetSpherePositionX(i)
+                                    + DataLayer.GetSphereDirections(i)[0]), 2)+ Math.Pow((DataLayer.GetSpherePositionY(id) + DataLayer.GetSphereDirections(id)[1])
+                                    - (DataLayer.GetSpherePositionY(i) + DataLayer.GetSphereDirections(i)[1]), 2));
+
+                    if (Math.Abs(distance) <= DataLayer.GetSphereRadius(id) + DataLayer.GetSphereRadius(i))
                     {
-                        return false;
-                    }
-                    for (int j = 0; j < Field.SphereList.Count; j++)
-                    {
-                        if (b && inc)
-                        {
-                            Field.SphereList[j].Speed = (Field.SphereList[j].Speed + 1);
-                        }
-                        else if (dec)
-                        {
-                            Field.SphereList[j].Speed = (Field.SphereList[j].Speed - 1);
-                        } 
-                    }
-                    return true;
-                }
-            //Move all spheres using method from field.
-            public override void MoveAll()
-                {
-                    Field.MoveAll();
-                }
-
-                //Adding new sphere to our field.
-                public override void AddObject(Sphere s)
-                {
-                    Field.AddToList(s);
-                }
-
-                //Removing a sphere from the field.
-                public override void RemoveObject(Sphere s)
-                {
-                    Field.RemoveFromList(s);
-                }
-
-                //Getting a list of all spheres present in the field.
-                public override List<Sphere> GetAll()
-                {
-                    return Field.SphereList;
-                }
-
-                //Uses method from sphere class to randomise position of every sphere in the field.
-                public override void PickRandomPositions(int width, int height)
-                {
-                    for (int i = 0; i < Field.SphereList.Count; i++)
-                    {
-                        Field.SphereList[i].PickRandomPosition(Field.Width, Field.Height);
+                        double[] newMovement = ImpulseSpeed(id, i);
+                        DataLayer.SetSphereMovement(id, newMovement[0], newMovement[1]);
+                        DataLayer.SetSphereMovement(i, newMovement[0], newMovement[1]);
                     }
                 }
+            }
 
-                //Cleares the field of all spheres using it's method.
-                public override void RemoveAll()
+            public double[] ImpulseSpeed(int id, int id2)
+            {
+                double mass = DataLayer.GetSphereMass(id);
+                double otherMass = DataLayer.GetSphereMass(id2);
+
+                double[] velocity = new double[2] { DataLayer.GetSphereDirections(id)[0], DataLayer.GetSphereDirections(id)[1] };
+                double[] position = new double[2] { DataLayer.GetSpherePositionX(id), DataLayer.GetSpherePositionY(id) };
+
+                double[] velocityOther = new double[2] { DataLayer.GetSphereDirections(id2)[0], DataLayer.GetSphereDirections(id2)[1] };
+                double[] positionOther = new double[2] { DataLayer.GetSpherePositionX(id2), DataLayer.GetSpherePositionY(id2) };
+
+                double fDistance = (double)Math.Sqrt((position[0] - positionOther[0]) * (position[0] - positionOther[0])
+                       + (position[1] - positionOther[1]) * (position[1] - positionOther[1]));
+
+                double nx = (positionOther[0] - position[0]) / fDistance;
+                double ny = (positionOther[1] - position[1]) / fDistance;
+
+                double tx = -ny;
+                double ty = nx;
+
+                // Dot Product Tangent
+                double dpTan1 = velocity[0] * tx + velocity[1] * ty;
+                double dpTan2 = velocityOther[0] * tx + velocityOther[1] * ty;
+
+                // Dot Product Normal
+                double dpNorm1 = velocity[0] * nx + velocity[1] * ny;
+                double dpNorm2 = velocityOther[0] * nx + velocityOther[1] * ny;
+
+                // Conservation of momentum in 1D
+                double m1 = (dpNorm1 * (mass - otherMass) + 2.0f * otherMass * dpNorm2) / (mass + otherMass);
+                double m2 = (dpNorm2 * (otherMass - mass) + 2.0f * mass * dpNorm1) / (mass + otherMass);
+
+                double[] newMovements = new double[4]
                 {
-                    Field.RemoveAll();
+                    tx * dpTan1 + nx * m1,
+                    ty * dpTan1 + ny * m1,
+                    tx * dpTan2 + nx * m2,
+                    ty * dpTan2 + ny * m2
+                };
+
+                return newMovements;
+            }
+
+            #endregion
+
+            #region provider
+
+            public override IDisposable Subscribe(IObserver<int> observer)
+            {
+                if (!observers.Contains(observer))
+                    observers.Add(observer);
+                return new Unsubscriber(observers, observer);
+            }
+
+            private class Unsubscriber : IDisposable
+            {
+                private IList<IObserver<int>> _observers;
+                private IObserver<int> _observer;
+
+                public Unsubscriber
+                (IList<IObserver<int>> observers, IObserver<int> observer)
+                {
+                    _observers = observers;
+                    _observer = observer;
                 }
+
+                public void Dispose()
+                {
+                    if (_observer != null && _observers.Contains(_observer))
+                        _observers.Remove(_observer);
+                }
+            }
+
+            #endregion
         }
     }
 }

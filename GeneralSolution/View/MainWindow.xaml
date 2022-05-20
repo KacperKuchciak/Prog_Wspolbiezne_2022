@@ -20,14 +20,14 @@
 
             <ItemsControl.ItemContainerStyle>
                 <Style TargetType="{x:Type ContentPresenter}">
-                    <Setter Property="Canvas.Left" Value="{Binding X}" />
-                    <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                    <Setter Property="Canvas.Left" Value="{Binding Left}" />
+                    <Setter Property="Canvas.Top" Value="{Binding Top}" />
                 </Style>
             </ItemsControl.ItemContainerStyle>
 
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Ellipse Width="{Binding R}" Height="{Binding R}" Fill="red" />
+                    <Ellipse Width="{Binding Diameter}" Height="{Binding Diameter}" Fill="red" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
