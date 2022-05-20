@@ -20,7 +20,7 @@ namespace DataLayer
         public double Speed { get; set; }
         public double M { get; set; }
         internal readonly IList<IObserver<Sphere>> observers;
-        private async Task SphereThread;
+        private Task SphereThread;
 
         //Constructor assigning to a sphere it's position in 2D and radius (how big it is).
         public Sphere(int Id, double x = 10, double y = 10, int r = 5)
@@ -32,7 +32,6 @@ namespace DataLayer
             Y = y;
             observers = new List<IObserver<Sphere>>();
             PickRandomDirection();
-            PickRandomPosition(350 - 2 * R, 350 - 2 * R);
         }
 
         //Function that allows us to pick random starting positions for the spheres.
@@ -41,6 +40,7 @@ namespace DataLayer
             //We use max width and hight - R*4, beacuse we want the balls to start with some distance from the edge of our window.
             this.X = this.R * 4 + randomiser.Next(width - this.R * 8);
             this.Y = this.R * 4 + randomiser.Next(height - this.R * 8);
+            NotifyObservers();
         }
 
         public void PickRandomDirection()
@@ -55,6 +55,7 @@ namespace DataLayer
             //Finally we randomise where we are moving to.
             this.Direction_X = (double)(0.0001 * X_axis * (1 + randomiser.Next(10000))) * Speed;
             this.Direction_Y = (double)(0.0001 * Y_axis * (1 + randomiser.Next(10000))) * Speed;
+
         }
 
         //This method makes a single sphere change it's position towards the direction.
@@ -67,6 +68,7 @@ namespace DataLayer
                 Y += Direction_Y;
             }
 
+
             NotifyObservers();
         }
 
@@ -77,6 +79,8 @@ namespace DataLayer
                 this.Direction_X = -this.Direction_X;
             else if (whichDirection == 'y')
                 this.Direction_Y = -this.Direction_Y;
+
+            NotifyObservers();
         }
 
         public void StartMoving()

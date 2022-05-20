@@ -1,5 +1,4 @@
-﻿
-using Logic;
+﻿using Logic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 

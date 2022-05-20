@@ -15,7 +15,6 @@ namespace Logic
         public int[] Size { get; set; }
         public abstract void MoveAll();
         public abstract int AddObject();
-        public abstract bool ChangeSpeed(bool b);
         public abstract void OnCompleted();
         public abstract void OnError(Exception error);
         public abstract void OnNext(Sphere sphere);
@@ -42,39 +41,11 @@ namespace Logic
                 Subscribe(DataLayer);
                 observers = new List<IObserver<int>>();
                 int[] table = new int[2];
-                table[0] = DataLayer.getWidth();
-                table[1] = DataLayer.getHeight();
+                table[0] = DataLayer.GetWidth();
+                table[1] = DataLayer.GetHeight();
                 Size = table;
             }
-            //Allows us to change speed while making sure that we don't slow it down to zero
-            public override bool ChangeSpeed(bool b)
-            {
-                bool inc = true;
-                bool dec = true;
-                for (int i = 0; i < DataLayer.GetSpheresCount(); i++)
-                {
-                    if (DataLayer.GetSphereSpeed(i) <= 1)
-                        dec = false;
-                    if (DataLayer.GetSphereSpeed(i) >= 20)
-                        inc = false;
-                }
-                if ((b && !inc) || (!b && !dec))
-                {
-                    return false;
-                }
-                for (int j = 0; j < DataLayer.GetSpheresCount(); j++)
-                {
-                    if (b && inc)
-                    {
-                        DataLayer.SetSphereSpeed(j, DataLayer.GetSphereSpeed(j) + 1);
-                    }
-                    else if (dec)
-                    {
-                        DataLayer.SetSphereSpeed(j, DataLayer.GetSphereSpeed(j) - 1) ;
-                    }
-                }
-                return true;
-            }
+
             //Move all spheres using method from API.
             public override void MoveAll()
             {
@@ -122,6 +93,39 @@ namespace Logic
                 return DataLayer.GetSpheresCount();
             }
 
+            private void CheckBorders(int id)
+            {
+                double Position_X = DataLayer.GetSpherePositionX(id);
+                double Position_Y = DataLayer.GetSpherePositionY(id);
+                double[] Directions = DataLayer.GetSphereDirections(id);
+                int Radius = DataLayer.GetSphereRadius(id);
+                if (Position_X + Radius * 2 + Directions[0] > Size[0] || Position_X + Directions[0] < 0)
+                    SwitchDirections(id, true);
+                if (Position_Y + Radius * 2 + Directions[1] > Size[1] || Position_Y + Directions[1] < 0)
+                    SwitchDirections(id, false);
+
+            }
+
+            private void CheckCollisions(int id)
+            {
+                for (int i = 0; i < DataLayer.GetSpheresCount(); i++)
+                {
+                    if (i == id) continue;
+                    double distance = Math.Sqrt(Math.Pow((DataLayer.GetSpherePositionX(id) + DataLayer.GetSphereDirections(id)[0]) - (DataLayer.GetSpherePositionX(i)
+                                    + DataLayer.GetSphereDirections(i)[0]), 2) + Math.Pow((DataLayer.GetSpherePositionY(id) + DataLayer.GetSphereDirections(id)[1])
+                                    - (DataLayer.GetSpherePositionY(i) + DataLayer.GetSphereDirections(i)[1]), 2));
+
+                    if (Math.Abs(distance) <= DataLayer.GetSphereRadius(id) + DataLayer.GetSphereRadius(i))
+                    {
+                        double[] newMovement = ImpulseSpeed(id, i);
+                        DataLayer.SetSphereMovement(id, newMovement[0], newMovement[1]);
+                        DataLayer.SetSphereMovement(i, newMovement[2], newMovement[3]);
+                    }
+                }
+
+
+            }
+
 
             #region observer
 
@@ -144,7 +148,7 @@ namespace Logic
             public override void OnNext(Sphere Sphere)
             {
                 CheckBorders(Sphere.Id);
-                CheckCollisions(Sphere.Id);
+                CheckCollisions(Sphere.Id);   
                 NotifyObservers(Sphere.Id);
             }
 
@@ -158,36 +162,7 @@ namespace Logic
                     }
                 }
                 System.Threading.Thread.Sleep(1);
-            }
 
-            private void CheckBorders(int id)
-            {
-                double Position_X = DataLayer.GetSpherePositionX(id);
-                double Position_Y = DataLayer.GetSpherePositionY(id);
-                double[] Directions = DataLayer.GetSphereDirections(id);
-                int Radius = DataLayer.GetSphereRadius(id);
-                if (Position_X + Radius * 2 + Directions[0] > Size[0] || Position_X + Directions[0] < 0)
-                    SwitchDirections(id, true);
-                if (Position_Y + Radius * 2 + Directions[1] > Size[1] || Position_Y + Directions[1] < 0)
-                    SwitchDirections(id, false);
-            }
-
-            private void CheckCollisions(int id)
-            {
-                for (int i = 0; i < DataLayer.GetSpheresCount(); i++)
-                {
-                    if (i == id) continue;
-                    double distance = Math.Sqrt(Math.Pow((DataLayer.GetSpherePositionX(id) + DataLayer.GetSphereDirections(id)[0]) - (DataLayer.GetSpherePositionX(i)
-                                    + DataLayer.GetSphereDirections(i)[0]), 2)+ Math.Pow((DataLayer.GetSpherePositionY(id) + DataLayer.GetSphereDirections(id)[1])
-                                    - (DataLayer.GetSpherePositionY(i) + DataLayer.GetSphereDirections(i)[1]), 2));
-
-                    if (Math.Abs(distance) <= DataLayer.GetSphereRadius(id) + DataLayer.GetSphereRadius(i))
-                    {
-                        double[] newMovement = ImpulseSpeed(id, i);
-                        DataLayer.SetSphereMovement(id, newMovement[0], newMovement[1]);
-                        DataLayer.SetSphereMovement(i, newMovement[0], newMovement[1]);
-                    }
-                }
             }
 
             public double[] ImpulseSpeed(int id, int id2)

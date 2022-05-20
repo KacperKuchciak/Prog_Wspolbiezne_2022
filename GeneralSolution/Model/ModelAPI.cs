@@ -22,7 +22,6 @@ namespace Model
         public abstract void AddSpheres(int howMany);
         public abstract void AddNewSpheres(int howMany);
         public abstract void PickRandomPositions(int width, int height);
-        public abstract bool ChangeSpeed(bool b);
         public abstract void Subscribe(IObservable<int> provider);
         public abstract void OnCompleted();
         public abstract void OnError(Exception error);
@@ -51,7 +50,6 @@ namespace Model
     internal class ModelLayer : ModelAPI
     {
         private IDisposable unsubscriber;
-        private IList<IObserver<int>> observers;
         public event EventHandler<SphereChangeEventArgs> SphereChanged;
         private IObservable<EventPattern<SphereChangeEventArgs>> eventObservable = null;
 
@@ -103,11 +101,6 @@ namespace Model
             PresentedSpheres.Add(new PresentationSphere(id, position[0], position[1], radius, "red"));
         }
 
-        //Changing speed
-        public override bool ChangeSpeed(bool b)
-        {
-           return LogicLayer.ChangeSpeed(b);
-        }
 
         //Triggering movement in logical layer every 15ms.
         public override void MoveSpheres()

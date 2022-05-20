@@ -7,8 +7,8 @@ namespace DataLayer
     public abstract class DataAPI : IObserver<Sphere>, IObservable<Sphere>
     {
         public abstract int AddSphere();
-        public abstract int getHeight();
-        public abstract int getWidth();
+        public abstract int GetHeight();
+        public abstract int GetWidth();
         public abstract double GetSpherePositionX(int id);
         public abstract double GetSpherePositionY(int id);
         public abstract void SetSphereSpeed(int id, double speed);
@@ -40,24 +40,21 @@ namespace DataLayer
 
     public class DataLayer : DataAPI
     {
-        private Field field;
+        private readonly Field field;
         private IDisposable unsubscriber;
-        private IList<IObserver<Sphere>> observers;
-        private Barrier barrier;
+        private readonly IList<IObserver<Sphere>> observers;
         public bool IsMoving { get; set; } = false;
 
         public DataLayer(int width, int height)
         {
             this.field = new Field(width, height);
             observers = new List<IObserver<Sphere>>();
-            barrier = new Barrier(0);
         }
 
         public DataLayer(Field field)
         {
             this.field = field;
             observers = new List<IObserver<Sphere>>();
-            barrier = new Barrier(0);
         }
 
         public override int GetSpheresCount()
@@ -100,6 +97,7 @@ namespace DataLayer
 
         public override void StartMovingSphere(int id)
         {
+            IsMoving = true;
             GetSphere(id).StartMovingThread();
         }
 
@@ -112,9 +110,9 @@ namespace DataLayer
         public override void SwitchDirectionForSphere(int id, bool isX)
         {
             if (isX)
-                SetSphereMovement(id, GetSphere(id).Direction_X * (-1), GetSphere(id).Direction_Y);
+                GetSphere(id).AlternateDirection('x');
             else
-                SetSphereMovement(id, GetSphere(id).Direction_X, GetSphere(id).Direction_Y * (-1));
+                GetSphere(id).AlternateDirection('y');
         }
 
         public override void SetSphereSpeed(int id, double speed)
@@ -122,40 +120,21 @@ namespace DataLayer
             GetSphere(id).Speed = speed;
         }
 
-        public override int getHeight()
+        public override int GetHeight()
         {
             return field.Height;
         }
 
-        public override int getWidth()
+        public override int GetWidth()
         {
             return field.Width;
         }
 
         public override void RandomisePozitions(int width, int height)
         {
-            Boolean noCollisionAtStart = false;
-            while(!noCollisionAtStart)
+            foreach(Sphere sphere in GetSpheres())
             {
-                noCollisionAtStart = true;
-                foreach (Sphere sphere in GetSpheres())
-                {
-                    sphere.PickRandomPosition(width, height);
-                }
-                foreach (Sphere sphere in GetSpheres())
-                {
-                    foreach (Sphere sphereInside in GetSpheres())
-                    {
-                        if(sphere != sphereInside)
-                        {
-                            if(Math.Sqrt(Math.Pow(sphereInside.X - sphere.X, 2)) + Math.Sqrt(Math.Pow(sphereInside.Y - sphere.Y, 2)) <= sphere.R + sphereInside.R)
-                            {
-                                noCollisionAtStart = false;
-                                break;
-                            }
-                        }
-                    }
-                }
+                sphere.PickRandomPosition(width, height);
             }
         }
 
@@ -171,7 +150,6 @@ namespace DataLayer
 
         public override int AddSphere()
         {
-            barrier.AddParticipant();
             int i = field.AddSphere();
             Subscribe(GetSphere(i));
             return i;
@@ -190,8 +168,6 @@ namespace DataLayer
 
         public override void OnNext(Sphere Sphere)
         {
-            if (IsMoving)
-                barrier.SignalAndWait();
 
             foreach (IObserver<Sphere> observer in observers)
             {
@@ -218,20 +194,20 @@ namespace DataLayer
 
         private class Unsubscriber : IDisposable
         {
-            private IList<IObserver<Sphere>> _observers;
-            private IObserver<Sphere> _observer;
+            private readonly IList<IObserver<Sphere>> observers;
+            private readonly IObserver<Sphere> observer;
 
             public Unsubscriber
             (IList<IObserver<Sphere>> observers, IObserver<Sphere> observer)
             {
-                _observers = observers;
-                _observer = observer;
+                this.observers = observers;
+                this.observer = observer;
             }
 
             public void Dispose()
             {
-                if (_observer != null && _observers.Contains(_observer))
-                    _observers.Remove(_observer);
+                if (observer != null && observers.Contains(observer))
+                    observers.Remove(observer);
             }
         }
 

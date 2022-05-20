@@ -24,29 +24,11 @@ namespace DataLayer
         public int AddSphere()
         {
             Random rnd = new Random();
-            int newValue = 5 + rnd.Next(15);
+            int newValue = 5 + rnd.Next(5);
             SphereList.Add(new Sphere(SpheresCounter++));
             getSphere(SpheresCounter - 1).M = newValue / 2;
             getSphere(SpheresCounter - 1).R = newValue;
             return SpheresCounter - 1;
-        }
-
-        //Adding new object to the list.
-        public void AddToList(Sphere s)
-        {
-            if (!(s is null))
-            {
-                SphereList.Add(s);
-            }
-        }
-
-        //Removing object from the list.
-        public void RemoveFromList(Sphere s)
-        {
-            if (!(s is null))
-            {
-                SphereList.Remove(s);
-            }
         }
 
         public Sphere getSphere(int Id)

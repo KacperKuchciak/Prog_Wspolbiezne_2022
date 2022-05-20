@@ -31,12 +31,8 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-        <Button IsEnabled="{Binding CanResume}"  Content="RESUME" Width="94" Height="40" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Command="{Binding ResumeSimulationAction}"/>
-        <Button IsEnabled="{Binding CanPause}"  Content="PAUSE" Width="94" Height="40" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Command="{Binding PauseSimulationAction}"/>
-        <TextBox x:Name="textBox" Text="{Binding TextBox}" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="94" Margin="10,160,0,0" Height="29"/>
-        <Button IsEnabled="{Binding IsReadyToBegin}" Content="START" Width="94" Height="40" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Command="{Binding BeginSimulationAction}"/>
-        <Button IsEnabled="{Binding CanIncrease}" Content="+" Width="45" Height="20" HorizontalAlignment="Left" Margin="10,225,0,0" VerticalAlignment="Top" Command="{Binding IncreaseSpeedAction}"/>
-        <Button IsEnabled="{Binding CanDecrease}" Content="-" Width="45" Height="20" HorizontalAlignment="Left" Margin="59,225,0,0" VerticalAlignment="Top" Command="{Binding DecreaseSpeedAction}"/>
-        <TextBlock Text="SPEED" Width="94" Height="20" TextAlignment="Center" HorizontalAlignment="Left" Margin="10,200,0,0" VerticalAlignment="Top"/>
+        <Button IsEnabled="{Binding IsReadyToBegin}"  Content="SIMULATE" Width="90" Height="90" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Command="{Binding BeginSimulationAction}" Click="Button_Click"/>
+        <TextBox x:Name="textBox" Text="{Binding TextBox}" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" Margin="10,210,0,0" Height="29"/>
+        <Button IsEnabled="{Binding DidntStartYet}" Content="CREATE BALLS" Width="90" Height="90" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Command="{Binding PrepareSimulationAction}"/>
     </Grid>
 </Window>
