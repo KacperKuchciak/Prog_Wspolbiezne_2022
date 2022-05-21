@@ -29,10 +29,11 @@ namespace Model
         public abstract IDisposable Subscribe(IObserver<ISphere> observer);
     }
 
+    //Interface for ISphere (model representation of sphere, that notifies us when something changed with their property).
     public interface ISphere : INotifyPropertyChanged
     {
-        double Top { get; }
-        double Left { get; }
+        double Y { get; }
+        double X { get; }
         double Diameter { get; }
     }
 
@@ -49,6 +50,7 @@ namespace Model
 
     internal class ModelLayer : ModelAPI
     {
+        //All those things necesseary to observe model layer and event handler for it.
         private IDisposable unsubscriber;
         public event EventHandler<SphereChangeEventArgs> SphereChanged;
         private IObservable<EventPattern<SphereChangeEventArgs>> eventObservable = null;
@@ -69,7 +71,7 @@ namespace Model
             Subscribe(LogicLayer);
         }
 
-        //Method for adding random amount of spheres to the presentation layer.
+        //Method for adding particular amount of spheres to the presentation layer.
         public override void AddSpheres(int howMany)
         {
             for (int i = 0; i < LogicLayer.CountSpheres(); i++)
@@ -78,6 +80,7 @@ namespace Model
             }
         }
 
+        //Adding new spheres and notyfing about it via SphereChangeEvent.
         public override void AddNewSpheres(int howMany)
         {
             for (int i = 0; i < howMany; i++)
@@ -91,6 +94,7 @@ namespace Model
             }
         }
 
+        //Adding single visualisation of a sphere based on logicLayer.
         public void AddPresentedSphere(int id)
         {
             double[] position = new double[2];
@@ -102,19 +106,18 @@ namespace Model
         }
 
 
-        //Triggering movement in logical layer every 15ms.
+        //Triggering movement in logical layer.
         public override void MoveSpheres()
         {
             LogicLayer.MoveAll();
         }
 
+        //Refreshing sphere visualization based on movement in logic layer.
         public void UpdateSphere(int id)
         {
             double[] position = new double[2];
-            position[0] = LogicLayer.GetSphereX(id);
-            position[1] = LogicLayer.GetSphereY(id);
-            PresentedSpheres[id].Left = position[0];
-            PresentedSpheres[id].Top = position[1];
+            PresentedSpheres[id].X = LogicLayer.GetSphereX(id);
+            PresentedSpheres[id].Y = LogicLayer.GetSphereY(id);
         }
 
         //Ordering logic layer to randomise all positions for spheres.

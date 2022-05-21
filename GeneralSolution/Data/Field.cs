@@ -11,6 +11,8 @@ namespace DataLayer
         public List<Sphere> SphereList { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
+
+        //Special property for counting how many spheres the field contains.
         public int SpheresCounter { get; set; } = 0;
 
         //Basic constructor that doesn't fill the list of spheres, only initializes it.
@@ -21,17 +23,19 @@ namespace DataLayer
             SphereList = new List<Sphere>();
         }
 
+        //Creating a sphere with random radian, mass based on it and identifier based on how many spheres are already in.
         public int AddSphere()
         {
             Random rnd = new Random();
             int newValue = 5 + rnd.Next(5);
             SphereList.Add(new Sphere(SpheresCounter++));
-            getSphere(SpheresCounter - 1).M = newValue / 2;
-            getSphere(SpheresCounter - 1).R = newValue;
+            GetSphere(SpheresCounter - 1).M = newValue / 2;
+            GetSphere(SpheresCounter - 1).R = newValue;
             return SpheresCounter - 1;
         }
 
-        public Sphere getSphere(int Id)
+        //Simple getter for spheres that DataAPI can use.
+        public Sphere GetSphere(int Id)
         {
             return SphereList[Id];
         }

@@ -9,48 +9,44 @@ namespace Model
     {
         //Meant for string representation of color we pick.
         public string Color { get; set; }
+        //Here we go with diameter instead of radian, cause it works better with GUI.
         public double Diameter { get; }
         public int Id { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
-        private double top;
-        private double left;
-        public double Top
+
+        private double y;
+        private double x;
+
+        public double Y
         {
-            get { return top; }
+            get { return y; }
             set
             {
-                if (top == value) return;
-                top = value;
-                RaisePropertyChanged();
-            }
-        }
-        public double Left
-        {
-            get { return left; }
-            set
-            {
-                if (left == value) return;
-                left = value;
+                if (y == value) return;
+                y = value;
                 RaisePropertyChanged();
             }
         }
 
-
+        public double X
+        {
+            get { return x; }
+            set
+            {
+                if (x == value) return;
+                x = value;
+                RaisePropertyChanged();
+            }
+        }
 
         //Constructor for visual representation of the sphere. Default color is 'red'.
         public PresentationSphere(int id, double top, double left, double radius, string c = "red")
         {
             this.Id = id;
             this.Color = c;
-            this.top = top;
-            this.left = left;
+            this.y = top;
+            this.x = left;
             this.Diameter = 2 * radius;
-        }
-
-        public void Move(double poitionX, double positionY)
-        {
-            Left = poitionX;
-            Top = positionY;
         }
 
         private void RaisePropertyChanged([CallerMemberName] string propertyName = "")
