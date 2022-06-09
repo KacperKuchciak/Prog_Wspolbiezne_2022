@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -72,14 +73,14 @@ namespace DataLayer
         //This method makes a single sphere change it's position towards the direction.
         public void Move()
         {
-            //We lock the whole object so that nothing can access it's properities while movement ongoing.
+            //A well known movement operation from the previous assignment with lock, so that tasks won't be 
+            //trying to access data that is used by another task, when we don't want that.
             lock (this)
             {
                 //We move some distance.
                 X += Direction_X;
                 Y += Direction_Y;
             }
-
             NotifyObservers();
         }
 
@@ -102,7 +103,6 @@ namespace DataLayer
                 {
                     observer.OnNext(this);
                 }
-
             }
         }
 

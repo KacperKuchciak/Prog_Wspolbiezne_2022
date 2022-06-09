@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Text;
 
 namespace DataLayer
 {
@@ -25,6 +25,7 @@ namespace DataLayer
         public abstract void OnCompleted();
         public abstract void OnError(Exception error);
         public abstract void OnNext(Sphere sphere);
+        public abstract string PrepareLog(int id);
         public abstract IDisposable Subscribe(IObserver<Sphere> observer);
 
         public static DataLayer CreateDataLayer(int width, int height)
@@ -154,6 +155,28 @@ namespace DataLayer
             Subscribe(GetSphere(i));
             return i;
         }
+
+        //Here we create a string that is to become an entry in our log.
+        public override string PrepareLog(int id)
+        {
+            //This StringBulider is responsible for assembling our string for
+            //the logger.
+            StringBuilder logMessage = new StringBuilder();
+
+            //Sphere's ID goes first.
+            logMessage.Append($"ID: {id}\n");
+
+            //Next it's position (X an Y variables).
+            logMessage.Append($"X: {GetSphere(id).X}\n");
+            logMessage.Append($"Y: {GetSphere(id).Y}\n");
+
+            //And the movement in each direction it's about to make.
+            logMessage.Append($"X movement: {GetSphere(id).Direction_X}\n");
+            logMessage.Append($"Y movement: {GetSphere(id).Direction_Y}\n\n");
+
+            return logMessage.ToString();
+        }
+
 
         #region Observer
         public override void OnCompleted()

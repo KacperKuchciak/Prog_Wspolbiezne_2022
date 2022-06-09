@@ -31,6 +31,7 @@ namespace Logic
         private class BusinessLogic : LogicAPI
         {
             private readonly DataAPI DataLayer;
+            private Data.Logger logger;
             private IDisposable unsubscriber;
             private IList<IObserver<int>> observers;
 
@@ -40,6 +41,11 @@ namespace Logic
                 DataLayer = api;
                 Subscribe(DataLayer);
                 observers = new List<IObserver<int>>();
+
+                //We create logger when creating the logic of this application.
+                logger = new Data.Logger();
+                logger.StartLogging();
+
                 int[] table = new int[2];
                 //Size is asigned based on width and height stored in data layer.
                 table[0] = DataLayer.GetWidth();
@@ -155,6 +161,9 @@ namespace Logic
 
             public override void OnNext(Sphere Sphere)
             {
+                //We can succesfully use OnNext method to always creaty entry in the log whenever a ball is about
+                //to move.
+                logger.AddLog(DataLayer.PrepareLog(Sphere.Id));
                 //For every sphere we check for border collision, collision with other balls and then notify observers.
                 CheckBoundries(Sphere.Id);
                 CheckCollisions(Sphere.Id);   
